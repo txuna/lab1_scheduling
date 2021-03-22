@@ -25,7 +25,7 @@ typedef struct _AST{
     struct _AST* next_instruction;
 }AST;
 
-void parse(char* ins);
+AST* parse(char* ins);
 AST* loop_about_semicolon(char* ins);
 AST* parse_ins(char* ins);
 AST* set_ast(char* op, char* left, char* right);
@@ -36,4 +36,5 @@ void set_op(char* op, AST* node);
 
 void dump(AST* ast);
 AST* get_end_list(AST* ast);
+void free_ast(AST* ast);
 #endif

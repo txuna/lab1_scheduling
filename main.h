@@ -3,4 +3,6 @@
 
 #include "common.h"
 
+int menu();
+
 #endif

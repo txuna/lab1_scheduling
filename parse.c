@@ -3,9 +3,11 @@
 /*
 명령문을 읽어들이고 한줄 단위로 쪼갬 -> 한줄 씩 파싱하면서 띄워쓰기 단위로 끊고 구조체 구성
 */
-void parse(char* ins){
+AST* parse(char* ins){
     AST* command_list = loop_about_semicolon(ins);
-    dump(command_list);
+    //dump(command_list);
+    //free_ast(command_list);
+    return command_list;
 }
 
 void dump(AST* ast){
@@ -14,6 +16,20 @@ void dump(AST* ast){
         printf("OP_TYPE : %d\nLEFT_TYPE : %d\nRIGHT_TYPE : %d\n\n", dump_ast->op_type, dump_ast->left.type, dump_ast->right.type);
         dump_ast = dump_ast->next_instruction;
     }
+}
+
+void free_ast(AST* ast){
+    AST* curr = ast; 
+    AST* next = curr;
+    if(curr == NULL){
+        return;
+    }
+    while(curr){
+        free(curr);
+        next = curr->next_instruction;
+        curr = next;
+    }
+    return;
 }
 
 AST* get_end_list(AST* ast){
