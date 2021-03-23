@@ -36,9 +36,7 @@ typedef struct _Init{
     AST** parse_tree_list; //내부 리스트 free 필요
 }Init;
 
-typedef struct _PCB{
 
-}PCB;
 
 typedef struct _RegisterInfo{
     int A; 
@@ -47,10 +45,34 @@ typedef struct _RegisterInfo{
     int D;
 }RegisterInfo;
 
+// 명령어를 실행할 때 의 결과를 저장, 하나만 사용 이거를 전역으로 쓸까 고민중
 typedef struct _Resource{
     RegisterInfo regs;
     int current_ip; //몇 번째 줄의 명령어를 가리키고 있는지
 }Resource;
+
+//스케쥴링 될 때 해당 프로세스의 리소스 자원
+typedef struct _PCB{
+    Resource res;
+    int process_number;
+}PCB;
+
+typedef struct _Queue{
+    int process_number;
+    struct _Queue* next;
+}Queue;
+
+//해당 큐의 우선순위와 큐의 끝과 처음을 가리킨다. 
+typedef struct _QueueManager{
+    Queue* head; 
+    Queue* tail;
+    int priority; //해당 큐에 대한 우선순위 
+}QueueManager;
+
+//큐들의 배열이다. 
+typedef struct _QueueList{
+    Queue* queue_list; //Multi Level Feedback Queue에 대한 대비 이 스케쥴링이 아닐경우 단일로 사용
+}QueueList;
 
 //Main
 Init* menu();

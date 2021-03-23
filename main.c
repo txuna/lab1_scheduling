@@ -44,18 +44,27 @@ Init* menu(){
     printf("Now, You choice number of process.\n");
     printf("> ");
     scanf("%d", &init->process_numberof);
+    if(init->process_numberof <= 0 || init->process_numberof > 4){
+        error_handler("this range value isn't supported");
+    }
 
     init->arrive_time = (int*)malloc(init->process_numberof * sizeof(int));
     printf("Ok, Please input each arrive time.\n");
+    // 각 프로세스마다의 Arrive time 설정
     for(int i = 0; i < init->process_numberof; i++){
         printf("%d's arrive time : ", i+1);
         scanf("%d", &init->arrive_time[i]);
+        if(init->arrive_time[i] < 0){
+            error_handler("minus value isn't supported!");
+        }
     }
+    //프로세스 리스트 대입 
     init->process_list = (char**)malloc(init->process_numberof * sizeof(char**));
     for(int i = 0; i < init->process_numberof; i++){
         init->process_list[i] = processes[i];
     }
 
+    //프로세스 넘버에 맞게 AST를 담을 배열 생성
     init->parse_tree_list = (AST**)malloc(init->process_numberof * sizeof(AST**));
     return init;
 }

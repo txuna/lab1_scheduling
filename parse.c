@@ -8,9 +8,6 @@ void parse(Init* init){
         AST* command_list = loop_about_semicolon(init->process_list[i]);
         init->parse_tree_list[i] = command_list;
     }
-    
-    //dump(command_list);
-    //free_ast(command_list);
 }
 
 void dump(AST* ast){
