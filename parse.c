@@ -1,13 +1,16 @@
-#include "parse.h"
+#include "common.h"
 
 /*
 명령문을 읽어들이고 한줄 단위로 쪼갬 -> 한줄 씩 파싱하면서 띄워쓰기 단위로 끊고 구조체 구성
 */
-AST* parse(char* ins){
-    AST* command_list = loop_about_semicolon(ins);
+void parse(Init* init){
+    for(int i=0; i<init->process_numberof;i++){
+        AST* command_list = loop_about_semicolon(init->process_list[i]);
+        init->parse_tree_list[i] = command_list;
+    }
+    
     //dump(command_list);
     //free_ast(command_list);
-    return command_list;
 }
 
 void dump(AST* ast){
@@ -47,9 +50,10 @@ AST* get_end_list(AST* ast){
 parse로 받아온 ins를 세미클론 단위로 쪼개서 parse_ins에 넘김 
 */
 AST* loop_about_semicolon(char* ins){
+    char* new_ins = make_new_string(ins);
     AST* command_list = NULL;
     char* next_ptr = NULL;
-    char* ptr = strtok_r(ins, ";", &next_ptr);
+    char* ptr = strtok_r(new_ins, ";", &next_ptr);
     
     while(ptr != NULL){
         AST* node = parse_ins(ptr);
@@ -62,6 +66,7 @@ AST* loop_about_semicolon(char* ins){
         }
         ptr = strtok_r(NULL, ";", &next_ptr);
     }
+    free(new_ins);
     return command_list;
 }
 /*
@@ -82,7 +87,7 @@ AST* parse_ins(char* ins){
     char* right = make_new_string(ptr);
 
 
-    printf("INS : %s %s %s\n", op, right, left);
+    //printf("INS : %s %s %s\n", op, right, left);
     AST* node =  set_ast(op, left, right);
 
     free(op);

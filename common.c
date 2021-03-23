@@ -12,3 +12,4 @@ void error_handler(char* msg){
     printf("%s\n", msg);
     exit(1);
 }
+
