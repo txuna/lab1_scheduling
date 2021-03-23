@@ -100,9 +100,12 @@ void free_ast(AST* ast);
 //Core
 // ins 한줄을 실행 및 실행마다 Resource에 저장
 void execute_ins(AST* ast_ins, Resource* res);
+int get_value(Node node, Resource* res);
+void set_value(Node node, int value, Resource* res);
 
 //scheduling
 void scheduling(Init* init);
+void show_resource(Resource* res);
 
 void FIFO(Init* init, Resource* res);
 void SJF(Init* init, Resource* res);

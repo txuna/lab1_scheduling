@@ -14,7 +14,7 @@ int main(int argc, char** argv){
     for(int i = 0; i < init->process_numberof;i++){
         printf("=================================\n");
         dump(init->parse_tree_list[i]);
-        free_ast(init->parse_tree_list[i]);
+        //free_ast(init->parse_tree_list[i]);
     }
     scheduling(init);
 
@@ -28,7 +28,7 @@ int main(int argc, char** argv){
 Init* menu(){
 
     char* processes[] = {
-        "MOV A 9;SUB A 4;ADD A A",
+        "MOV A 9;SUB A 4;ADD A A;MOV B 4;SUB A B",
         "MOV B 10;SUB B 4;MOV C 2",
         "MOV D 20;MOV A 20;MOV C 7",
         "MOV A 5;ADD A 12;ADD A 16",
