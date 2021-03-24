@@ -21,6 +21,7 @@ int main(int argc, char** argv){
 
     free(init->process_list);
     free(init->arrive_time);
+    free(init->pcb_list);
     free(init);
     return 0;
 }
@@ -67,6 +68,7 @@ Init* menu(){
 
     //프로세스 넘버에 맞게 AST를 담을 배열 생성
     init->parse_tree_list = (AST**)malloc(init->process_numberof * sizeof(AST*));
+    init->pcb_list = (PCB*)malloc(init->process_numberof * sizeof(PCB));
     return init;
 }
 

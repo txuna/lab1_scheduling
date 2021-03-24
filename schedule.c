@@ -99,6 +99,7 @@ void check_arrive_time(Init* init, QueueManager* queue_manager, int queue_number
     }
 }
 
+//프로세스가 완전히 끝나더라도 초기화된 PCB를 백업 시켜주는 과정 포함시키기
 void FIFO(Init* init, Resource* res){
     int queue_number = 0;
     QueueManager* queue_manager = init_queue_manager(FIFO_QUEUE);
@@ -116,7 +117,17 @@ void FIFO(Init* init, Resource* res){
             //큐가 비어있지 않다면
             if(current_queue != NULL){
                 printf("-SWITCHING-");
+                /*
+                    Context Switching이 발생하는 부분 
+                    새로운  프로세스의 PCB를 초기화하고 res에 덮는다. 
+                */
                 current_process_number = current_queue->process_number;
+                PCB pcb;
+                //PCB* pcb =(PCB*)malloc(sizeof(PCB));
+                memset(&pcb.res, 0, sizeof(PCB));
+                pcb.process_number = current_process_number;
+                init->pcb_list[current_process_number] = pcb;
+                memcpy(res, &pcb.res, sizeof(Resource));
                 free(current_queue);
                 running = true;
                 //여기서 AST 넘김
@@ -126,10 +137,15 @@ void FIFO(Init* init, Resource* res){
             }
         } 
         else if(running == true){
-            //선점된 프로세스의 종료
+            /*
+                선점된 프로세스의 종료이다. 
+                나중을 위해 프로세스가 종료되더라도 해당 res를 해당 프로세스의 PCB에 넣는다. 
+            */
             if(processing_parse_tree == NULL){
                 running = false;
                 finished_number_of_process +=1;
+                memcpy(&init->pcb_list[current_process_number].res, res, sizeof(Resource));
+                //show_resource(&init->pcb_list[current_process_number].res);
             }
             else{
                 execute_ins(processing_parse_tree, res);
@@ -158,7 +174,7 @@ void MLFQ(Init* init, Resource* res){
 }
 
 void show_resource(Resource* res){
-    printf("===============REG=================\n");
+    printf("\n===============REG=================\n");
     printf("A regs : %d\n", res->regs.A);
     printf("B regs : %d\n", res->regs.B);
     printf("C regs : %d\n", res->regs.C);

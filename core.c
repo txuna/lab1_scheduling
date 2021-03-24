@@ -26,7 +26,10 @@ void execute_ins(AST* ast_ins, Resource* res){
         int left_value = get_value(ast_ins->left, res);
         int result = right_value + left_value;
         set_value(ast_ins->left, result, res);
+    }else{
+        return;
     }
+    res->current_ip+=1;
     return;
 }
 

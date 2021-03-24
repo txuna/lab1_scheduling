@@ -28,16 +28,6 @@ typedef struct _AST{
 }AST;
 
 
-typedef struct _Init{
-    int select; 
-    int process_numberof; 
-    int* arrive_time; //내부 값은 free할 필요 없음 
-    char** process_list; //문자열은 free 할 피요 없음 
-    AST** parse_tree_list; //내부 리스트 free 필요
-    int time_slice;
-    int* serive_time;
-}Init;
-
 
 
 typedef struct _RegisterInfo{
@@ -59,10 +49,23 @@ typedef struct _PCB{
     int process_number;
 }PCB;
 
+typedef struct _Init{
+    int select; 
+    int process_numberof; 
+    int* arrive_time; //내부 값은 free할 필요 없음 
+    char** process_list; //문자열은 free 할 피요 없음 
+    AST** parse_tree_list; //내부 리스트 free 필요
+    int time_slice;
+    int* serive_time;
+    PCB* pcb_list;
+}Init;
+
 typedef struct _Queue{
     int process_number;
     struct _Queue* next;
 }Queue;
+
+
 
 //해당 큐의 우선순위와 큐의 끝과 처음을 가리킨다. 
 typedef struct _QueueManager{
