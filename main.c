@@ -11,11 +11,12 @@ int main(int argc, char** argv){
     // init의 멤버인 AST** 설정
     parse(init);
     //Queue에 맞는 프로세싱 및 service time만큼의 run
+    /*
     for(int i = 0; i < init->process_numberof;i++){
         printf("=================================\n");
         dump(init->parse_tree_list[i]);
         //free_ast(init->parse_tree_list[i]);
-    }
+    } */
     scheduling(init);
 
     free(init->process_list);
@@ -59,13 +60,13 @@ Init* menu(){
         }
     }
     //프로세스 리스트 대입 
-    init->process_list = (char**)malloc(init->process_numberof * sizeof(char**));
+    init->process_list = (char**)malloc(init->process_numberof * sizeof(char*));
     for(int i = 0; i < init->process_numberof; i++){
         init->process_list[i] = processes[i];
     }
 
     //프로세스 넘버에 맞게 AST를 담을 배열 생성
-    init->parse_tree_list = (AST**)malloc(init->process_numberof * sizeof(AST**));
+    init->parse_tree_list = (AST**)malloc(init->process_numberof * sizeof(AST*));
     return init;
 }
 

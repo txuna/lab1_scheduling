@@ -34,6 +34,8 @@ typedef struct _Init{
     int* arrive_time; //내부 값은 free할 필요 없음 
     char** process_list; //문자열은 free 할 피요 없음 
     AST** parse_tree_list; //내부 리스트 free 필요
+    int time_slice;
+    int* serive_time;
 }Init;
 
 
@@ -69,10 +71,6 @@ typedef struct _QueueManager{
     int priority; //해당 큐에 대한 우선순위 
 }QueueManager;
 
-//큐들의 배열이다. 
-typedef struct _QueueList{
-    Queue* queue_list; //Multi Level Feedback Queue에 대한 대비 이 스케쥴링이 아닐경우 단일로 사용
-}QueueList;
 
 //Main
 Init* menu();
@@ -111,5 +109,13 @@ void FIFO(Init* init, Resource* res);
 void SJF(Init* init, Resource* res);
 void RR(Init* init, Resource* res);
 void MLFQ(Init* init, Resource* res);
+
+void free_queue_manager(QueueManager* queue_manager, int queue_size);
+void free_queue(Queue* head);
+
+void insert_queue(QueueManager* queue_manager, int queue_number, int process_number);
+Queue* get_queue(QueueManager* queue_manager, int queue_number);
+
+void check_arrive_time(Init* init, QueueManager* queue_manager, int queue_number, int cpu_time);    
 
 #endif 
