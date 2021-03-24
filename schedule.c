@@ -123,7 +123,6 @@ void FIFO(Init* init, Resource* res){
                 */
                 current_process_number = current_queue->process_number;
                 PCB pcb;
-                //PCB* pcb =(PCB*)malloc(sizeof(PCB));
                 memset(&pcb.res, 0, sizeof(PCB));
                 pcb.process_number = current_process_number;
                 init->pcb_list[current_process_number] = pcb;

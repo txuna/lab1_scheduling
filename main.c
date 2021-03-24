@@ -11,17 +11,18 @@ int main(int argc, char** argv){
     // init의 멤버인 AST** 설정
     parse(init);
     //Queue에 맞는 프로세싱 및 service time만큼의 run
-    /*
-    for(int i = 0; i < init->process_numberof;i++){
-        printf("=================================\n");
-        dump(init->parse_tree_list[i]);
-        //free_ast(init->parse_tree_list[i]);
-    } */
+
+
     scheduling(init);
 
     free(init->process_list);
     free(init->arrive_time);
     free(init->pcb_list);
+    for(int i = 0; i < init->process_numberof;i++){
+        //dump(init->parse_tree_list[i]);
+        free_ast(init->parse_tree_list[i]);
+    } 
+    free(init->parse_tree_list);
     free(init);
     return 0;
 }
