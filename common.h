@@ -62,6 +62,7 @@ typedef struct _Init{
 
 typedef struct _Queue{
     int process_number;
+    int service_time;
     struct _Queue* next;
 }Queue;
 
@@ -86,7 +87,7 @@ void error_handler(char* msg);
 //Parse
 
 void parse(Init* init);
-AST* loop_about_semicolon(char* ins);
+AST* loop_about_semicolon(char* ins, int* service_time);
 AST* parse_ins(char* ins);
 AST* set_ast(char* op, char* left, char* right);
 
@@ -116,9 +117,14 @@ void MLFQ(Init* init, Resource* res);
 void free_queue_manager(QueueManager* queue_manager, int queue_size);
 void free_queue(Queue* head);
 
-void insert_queue(QueueManager* queue_manager, int queue_number, int process_number);
+void insert_queue(QueueManager* queue_manager, int queue_number, int process_number, int service_time);
 Queue* get_queue(QueueManager* queue_manager, int queue_number);
+Queue* get_min_queue(QueueManager* queue_manager, int queue_number);
+
 
 void check_arrive_time(Init* init, QueueManager* queue_manager, int queue_number, int cpu_time);    
+void init_pcb(int process_number, Resource* res, Init* init);
+void backup_pcb(Init* init, int process_number, Resource* res);
+void set_pcb(Init* init, int process_number, Resource* res);
 
 #endif 

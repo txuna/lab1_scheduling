@@ -5,8 +5,10 @@
 */
 void parse(Init* init){
     for(int i=0; i<init->process_numberof;i++){
-        AST* command_list = loop_about_semicolon(init->process_list[i]);
+        int service_time = 0;
+        AST* command_list = loop_about_semicolon(init->process_list[i], &service_time);
         init->parse_tree_list[i] = command_list;
+        init->serive_time[i] = service_time;
     }
 }
 
@@ -46,7 +48,7 @@ AST* get_end_list(AST* ast){
 /*
 parse로 받아온 ins를 세미클론 단위로 쪼개서 parse_ins에 넘김 
 */
-AST* loop_about_semicolon(char* ins){
+AST* loop_about_semicolon(char* ins, int* service_time){
     char* new_ins = make_new_string(ins);
     AST* command_list = NULL;
     char* next_ptr = NULL;
@@ -54,6 +56,7 @@ AST* loop_about_semicolon(char* ins){
     
     while(ptr != NULL){
         AST* node = parse_ins(ptr);
+        *service_time += 1;
         if(command_list == NULL){
             command_list = node;
         }else{

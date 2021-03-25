@@ -18,6 +18,7 @@ int main(int argc, char** argv){
     free(init->process_list);
     free(init->arrive_time);
     free(init->pcb_list);
+    free(init->serive_time);
     for(int i = 0; i < init->process_numberof;i++){
         //dump(init->parse_tree_list[i]);
         free_ast(init->parse_tree_list[i]);
@@ -32,7 +33,7 @@ Init* menu(){
 
     char* processes[] = {
         "MOV A 9;SUB A 4;ADD A A;MOV B 4;SUB A B",
-        "MOV B 10;SUB B 4;MOV C 2",
+        "MOV B 10;SUB B 4;MOV C 2;SUB B 2",
         "MOV D 20;MOV A 20;MOV C 7",
         "MOV A 5;ADD A 12;ADD A 16",
     };
@@ -55,7 +56,7 @@ Init* menu(){
     printf("Ok, Please input each arrive time.\n");
     // 각 프로세스마다의 Arrive time 설정
     for(int i = 0; i < init->process_numberof; i++){
-        printf("%d's arrive time : ", i+1);
+        printf("%d's arrive time : ", i);
         scanf("%d", &init->arrive_time[i]);
         if(init->arrive_time[i] < 0){
             error_handler("minus value isn't supported!");
@@ -70,6 +71,7 @@ Init* menu(){
     //프로세스 넘버에 맞게 AST를 담을 배열 생성
     init->parse_tree_list = (AST**)malloc(init->process_numberof * sizeof(AST*));
     init->pcb_list = (PCB*)malloc(init->process_numberof * sizeof(PCB));
+    init->serive_time = (int*)malloc(sizeof(int) * init->process_numberof);
     return init;
 }
 
