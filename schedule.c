@@ -22,6 +22,7 @@ void scheduling(Init* init){
             break;
 
         case 3:
+            RR(init, res);
             break;
 
         case 4:
@@ -182,7 +183,7 @@ void FIFO(Init* init, Resource* res){
                     새로운  프로세스의 PCB를 초기화하고 res에 덮는다. 
                 */
                 current_process_number = current_queue->process_number;
-                printf("CURRENT : %d\n", current_process_number);
+
                 init_pcb(current_process_number, res, init);
                 set_pcb(init, current_process_number, res);
                 free(current_queue);
@@ -275,11 +276,93 @@ void SJF(Init* init, Resource* res){
 }
 
 void RR(Init* init, Resource* res){
-    int time_slice = 1;
+    int time_slice = 2;
+    int queue_number = 0;
+    QueueManager* queue_manager = init_queue_manager(RR_QUEUE);
+    int cpu_time = 0;
+    int running = false;
+    int current_process_number = 0;
+    AST* processing_parse_tree = NULL;
+    int current_time_slice = 0;
+
+    for(int finished_number_of_process = 0;finished_number_of_process<init->process_numberof;){
+        check_arrive_time(init, queue_manager, queue_number, cpu_time);
+
+        if(running == false){
+            Queue* current_queue = get_queue(queue_manager, queue_number);
+            if(current_queue != NULL){
+                printf("-SWITCHING-");
+                /*
+                    Context Switching이 발생하는 부분 
+                    새로운  프로세스의 PCB를 초기화하고 res에 덮는다. 
+                */
+               
+                current_process_number = current_queue->process_number;
+                //printf("-GET:%d-", current_process_number);
+                //스케쥴링 되지 않은 새로운 프로세스 +새로운 프로세스였는지 기존에 스케쥴링 된거였는지 확인필요
+                if(init->status[current_process_number] == READY){
+                    init_pcb(current_process_number, res, init);
+                }
+                //이미 한번 스케쥴링을 거쳤으나 끝나지 않은 상태 
+                else if(init->status[current_process_number] == WAIT){
+                    /*
+                    
+                    */
+                }
+                set_pcb(init, current_process_number, res);
+                free(current_queue);
+                running = true;
+                //여기서 AST 넘김 + 이전에 진행했던 current_ip만큼 땡겨서 옴
+                processing_parse_tree = get_current_parse_tree(init, current_process_number);
+            }else{
+                printf("-SLEEP-");
+            }
+        }
+        //여기서 할당된 시간만큼 다 썼다면 insert_queue하고 pcb 백업 및 러닝 종료 
+        else if(running == true){
+            if(current_time_slice >= time_slice || processing_parse_tree == NULL){  
+                //프로세스의 완전한 종료
+                if(processing_parse_tree == NULL){
+                    finished_number_of_process +=1;
+                    init->status[current_process_number] = TERMINATE;
+                }else{
+                    //스케쥴링 할당 시간만 끝난거니 상태를 WAIT로 두고 다시 큐에 넣는다.
+                    backup_pcb(init, current_process_number, res);
+                    get_process_service_time(init, current_process_number, current_time_slice);
+                    insert_queue(queue_manager, queue_number, current_process_number, init->serive_time[current_process_number]);
+                    init->status[current_process_number] = WAIT;
+                }
+                running = false;
+                current_time_slice = 0;
+            }else{
+                execute_ins(processing_parse_tree, res);
+                processing_parse_tree = processing_parse_tree->next_instruction;
+                printf("-%d-", current_process_number);
+                current_time_slice += 1;
+            }
+            
+        }
+        cpu_time+=1;
+    }
 }
 
 void MLFQ(Init* init, Resource* res){
+    
+}
 
+void get_process_service_time(Init* init, int process_number, int time){
+    init->serive_time[process_number] -= time;
+}
+
+//processing_parse_tree는 여기서 current_Ip만큼 땡겨서 가지고옴
+AST* get_current_parse_tree(Init* init, int process_number){
+    AST* parse_tree = init->parse_tree_list[process_number];
+    int current_ip = init->pcb_list[process_number].res.current_ip;
+
+    for(int i=0;i<current_ip;i++){
+        parse_tree = parse_tree->next_instruction;
+    }
+    return parse_tree;
 }
 
 void show_resource(Resource* res){

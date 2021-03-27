@@ -12,6 +12,10 @@
 #define REG 1
 #define VALUE 2
 
+#define READY 1
+#define WAIT 2
+#define TERMINATE 3
+
 typedef struct _Node{
     int type; // REG or VALUE
     union{
@@ -58,6 +62,7 @@ typedef struct _Init{
     int time_slice;
     int* serive_time;
     PCB* pcb_list;
+    int* status; //현재 프로세스의 상태를 확인 . WAIT은 이전에 스케쥴링한 경험이 있음, READY새로운 상태, TERMINATE 종료
 }Init;
 
 typedef struct _Queue{
@@ -121,7 +126,8 @@ void insert_queue(QueueManager* queue_manager, int queue_number, int process_num
 Queue* get_queue(QueueManager* queue_manager, int queue_number);
 Queue* get_min_queue(QueueManager* queue_manager, int queue_number);
 
-
+void get_process_service_time(Init* init, int process_number, int time);
+AST* get_current_parse_tree(Init* init, int process_number);
 void check_arrive_time(Init* init, QueueManager* queue_manager, int queue_number, int cpu_time);    
 void init_pcb(int process_number, Resource* res, Init* init);
 void backup_pcb(Init* init, int process_number, Resource* res);

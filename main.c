@@ -23,6 +23,7 @@ int main(int argc, char** argv){
         //dump(init->parse_tree_list[i]);
         free_ast(init->parse_tree_list[i]);
     } 
+    free(init->status);
     free(init->parse_tree_list);
     free(init);
     return 0;
@@ -64,8 +65,10 @@ Init* menu(){
     }
     //프로세스 리스트 대입 
     init->process_list = (char**)malloc(init->process_numberof * sizeof(char*));
+    init->status = (int*)malloc(init->process_numberof * sizeof(int));
     for(int i = 0; i < init->process_numberof; i++){
         init->process_list[i] = processes[i];
+        init->status[i] = READY;
     }
 
     //프로세스 넘버에 맞게 AST를 담을 배열 생성
