@@ -119,6 +119,8 @@ void SJF(Init* init, Resource* res);
 void RR(Init* init, Resource* res);
 void MLFQ(Init* init, Resource* res);
 
+void fifo_sjf(Init* init, Resource* res, int type);
+
 void free_queue_manager(QueueManager* queue_manager, int queue_size);
 void free_queue(Queue* head);
 
