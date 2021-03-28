@@ -32,6 +32,7 @@ void scheduling(Init* init){
             break;
 
         case 4:
+            MLFQ(init, res);
             break;
 
         default:
@@ -58,7 +59,13 @@ void free_queue(Queue* head){
 }
 
 void print_queue(QueueManager* queue_manager, int queue_number){
-    return;
+    Queue* curr = queue_manager[queue_number].head;
+    printf("\nQUEUE : ");
+    while(curr){
+        printf("-%d", curr->process_number);
+        curr = curr->next;
+    }
+    printf("\n");
 }
 
 void insert_queue(QueueManager* queue_manager, int queue_number, int process_number, int service_time){
@@ -78,7 +85,7 @@ void insert_queue(QueueManager* queue_manager, int queue_number, int process_num
 Queue* get_min_queue(QueueManager* queue_manager, int queue_number){
     Queue* pivot = queue_manager[queue_number].head;
     Queue* tmp = pivot;
-    Queue* prev = NULL;
+    Queue* prev = tmp;
     if(pivot == NULL){
         return NULL;
     }
@@ -90,8 +97,8 @@ Queue* get_min_queue(QueueManager* queue_manager, int queue_number){
     while(tmp->next){
         if(pivot->service_time >= tmp->next->service_time){
             pivot = tmp->next;
+            prev = tmp;
         }
-        prev = tmp;
         tmp = tmp->next;
     }
     if(pivot == queue_manager[queue_number].head){
@@ -101,10 +108,12 @@ Queue* get_min_queue(QueueManager* queue_manager, int queue_number){
         prev->next = NULL;
         queue_manager[queue_number].tail = prev;
     }
-    else{
+    else{  
         prev->next = pivot->next;
+  
     }
     return pivot;
+    
 }
 
 //Queue리스트에서 첫번째 큐를 빼내온다. Head값 가져옴
@@ -171,11 +180,15 @@ void get_process_service_time(Init* init, int process_number, int time){
 
 //processing_parse_tree는 여기서 current_Ip만큼 땡겨서 가지고옴
 AST* get_current_parse_tree(Init* init, int process_number){
+    
     AST* parse_tree = init->parse_tree_list[process_number];
     int current_ip = init->pcb_list[process_number].res.current_ip;
-
+    //printf("\nnumber :  %dparse : %d\n",process_number, current_ip);
     for(int i=0;i<current_ip;i++){
         parse_tree = parse_tree->next_instruction;
+        if(parse_tree == NULL){
+            return NULL;
+        }
     }
     return parse_tree;
 }
@@ -199,10 +212,14 @@ void fifo_sjf(Init* init, Resource* res, int type){
     int running = false;
     int current_process_number = 0;
     AST* processing_parse_tree = NULL;
+    int is_switching = false;
 
     for(int finished_number_of_process = 0;finished_number_of_process<init->process_numberof;){
         //CPU Time과 각 프로세스간의 Arrive 타임 체크 동일한 시간대라면 큐를 삽입한다. 
-        check_arrive_time(init, queue_manager, queue_number, cpu_time);
+        if(!is_switching){
+            check_arrive_time(init, queue_manager, queue_number, cpu_time);
+        }
+        is_switching = false;
         //Running상태가 아니라면 큐에서 첫 번째 큐를 가지고온다. 
         //그리고 running true로 설정하고 프로세싱 -> 프로세싱이 끝나면 running false
         if(running == false){
@@ -217,6 +234,7 @@ void fifo_sjf(Init* init, Resource* res, int type){
             //큐가 비어있지 않다면
             if(current_queue != NULL){
                 printf("-SWITCHING-");
+                is_switching = true;
                 /*
                     Context Switching이 발생하는 부분 
                     새로운  프로세스의 PCB를 초기화하고 res에 덮는다. 
@@ -249,68 +267,70 @@ void fifo_sjf(Init* init, Resource* res, int type){
                 printf("-%d-", current_process_number);
             }
         }
-        cpu_time+=1;
+        if(!is_switching){
+            cpu_time+=1;   
+        }
+       
     }
     free(queue_manager);   
 }
 
-void RR(Init* init, Resource* res){
-    int time_slice = 2;
+void MLFQ_RR(Init* init, Resource* res, int type_queue_number){
+    int time_slice = 1;
     int queue_number = 0;
-    QueueManager* queue_manager = init_queue_manager(RR_QUEUE);
+    QueueManager* queue_manager = init_queue_manager(MLFQ_QUEUE);
     int cpu_time = 0;
     int running = false;
     int current_process_number = 0;
     AST* processing_parse_tree = NULL;
     int current_time_slice = 0;
+    int is_switching = false;
 
     for(int finished_number_of_process = 0;finished_number_of_process<init->process_numberof;){
-        check_arrive_time(init, queue_manager, queue_number, cpu_time);
-
-        if(running == false){
-            Queue* current_queue = get_queue(queue_manager, queue_number);
-            if(current_queue != NULL){
-                printf("-SWITCHING-");
-                /*
-                    Context Switching이 발생하는 부분 
-                    새로운  프로세스의 PCB를 초기화하고 res에 덮는다. 
-                */
-               
-                current_process_number = current_queue->process_number;
-                //printf("-GET:%d-", current_process_number);
-                //스케쥴링 되지 않은 새로운 프로세스 +새로운 프로세스였는지 기존에 스케쥴링 된거였는지 확인필요
-                if(init->status[current_process_number] == READY){
-                    init_pcb(current_process_number, res, init);
-                }
-                //이미 한번 스케쥴링을 거쳤으나 끝나지 않은 상태 
-                else if(init->status[current_process_number] == WAIT){
-                    /*
-                    
-                    */
-                }
-                set_pcb(init, current_process_number, res);
-                free(current_queue);
-                running = true;
-                //여기서 AST 넘김 + 이전에 진행했던 current_ip만큼 땡겨서 옴
-                processing_parse_tree = get_current_parse_tree(init, current_process_number);
-            }else{
-                printf("-SLEEP-");
-            }
+        if(!is_switching){
+            check_arrive_time(init, queue_manager, 0, cpu_time);
         }
-        //여기서 할당된 시간만큼 다 썼다면 insert_queue하고 pcb 백업 및 러닝 종료 
+        is_switching = false;
+        if(running == false){
+            //항상 모든 우선순위 큐를 돌리면서 우선순위가 높은 큐에 값이 있는지 찾는다. 
+            for(queue_number=0;queue_number<type_queue_number;queue_number++){
+                Queue* current_queue = get_queue(queue_manager, queue_number);
+                if(current_queue == NULL){
+                    continue; // 해당 큐는 비어져있으니 다음 우선순위의 큐를 찾는다.
+                }else{
+                    //printf("-SWITCHING-");
+                    is_switching = true;
+                    current_process_number = current_queue->process_number;
+                    if(init->status[current_process_number] == READY){
+                        init_pcb(current_process_number, res, init);
+                    }
+                    set_pcb(init, current_process_number, res);
+                    free(current_queue);
+                    running = true;
+                    processing_parse_tree = get_current_parse_tree(init, current_process_number);
+                    break;
+                }
+            }
+            
+        } 
         else if(running == true){
-            if(current_time_slice >= time_slice || processing_parse_tree == NULL){  
-                //프로세스의 완전한 종료
-                if(processing_parse_tree == NULL){
+            if(current_time_slice >= time_slice || processing_parse_tree == NULL){
+                 if(processing_parse_tree == NULL){
+                     //프로세스가 완전히 끝남
                     finished_number_of_process +=1;
                     init->status[current_process_number] = TERMINATE;
-                }else{
-                    //스케쥴링 할당 시간만 끝난거니 상태를 WAIT로 두고 다시 큐에 넣는다.
+                 }else{
+                     //시간 할당량만을 다 썼기에 다음 순위의 큐에 insert 만약 최하위 큐라면 다시 해당 큐로 
                     backup_pcb(init, current_process_number, res);
                     get_process_service_time(init, current_process_number, current_time_slice);
-                    insert_queue(queue_manager, queue_number, current_process_number, init->serive_time[current_process_number]);
+                    if(queue_number == type_queue_number-1){
+                        insert_queue(queue_manager, queue_number, current_process_number, init->serive_time[current_process_number]);
+                    }else{
+                        insert_queue(queue_manager, queue_number+1, current_process_number, init->serive_time[current_process_number]);
+                    }
                     init->status[current_process_number] = WAIT;
-                }
+                 }
+                //is_switching = true;
                 running = false;
                 current_time_slice = 0;
             }else{
@@ -319,14 +339,25 @@ void RR(Init* init, Resource* res){
                 printf("-%d-", current_process_number);
                 current_time_slice += 1;
             }
-            
         }
-        cpu_time+=1;
+        if(!is_switching){
+            cpu_time+=1;   
+        }
     }
 }
 
+void RR(Init* init, Resource* res){
+    MLFQ_RR(init, res, RR_QUEUE);
+}
+/*
+새로들어오는 작업들은 우선순위가 가장 높은 큐에 넣는다. 
+우선순위가 높은 큐(0-->1-->2) 부터 스케쥴링을 처리한다. 
+우선순위가 가장 높은 큐를 처리하고나서 해당 큐가 비워져 있다면 다음 우선순위큐를 처리한다. 처리하다가 우선순위가 높은 큐가 있다면 해당 큐를 다시 처리한다. 
+
+
+*/
 void MLFQ(Init* init, Resource* res){
-    
+    MLFQ_RR(init, res, MLFQ_QUEUE);
 }
 
 

@@ -33,10 +33,10 @@ int main(int argc, char** argv){
 Init* menu(){
 
     char* processes[] = {
-        "MOV A 9;SUB A 4;ADD A A;MOV B 4;SUB A B",
-        "MOV B 10;SUB B 4;MOV C 2;SUB B 2",
-        "MOV D 20;MOV A 20;MOV C 7",
-        "MOV A 5;ADD A 12;ADD A 16",
+        "MOV A 9;SUB A 4;ADD A A",
+        "MOV B 10;SUB B 4;MOV C 2;SUB B 2;MOV B 4;MOV C 4",
+        "MOV D 20;MOV A 20;MOV C 7;ADD A A",
+        "MOV A 5;ADD A 12;ADD A 16;ADD A A;ADD A A",
     };
 
     Init* init = (Init*)malloc(sizeof(Init));

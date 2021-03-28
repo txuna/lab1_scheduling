@@ -119,11 +119,13 @@ void SJF(Init* init, Resource* res);
 void RR(Init* init, Resource* res);
 void MLFQ(Init* init, Resource* res);
 
+void MLFQ_RR(Init* init, Resource* res, int type_queue_number);
 void fifo_sjf(Init* init, Resource* res, int type);
 
 void free_queue_manager(QueueManager* queue_manager, int queue_size);
 void free_queue(Queue* head);
 
+void print_queue(QueueManager* queue_manager, int queue_number);
 void insert_queue(QueueManager* queue_manager, int queue_number, int process_number, int service_time);
 Queue* get_queue(QueueManager* queue_manager, int queue_number);
 Queue* get_min_queue(QueueManager* queue_manager, int queue_number);
