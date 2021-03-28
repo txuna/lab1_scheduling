@@ -11,6 +11,7 @@ void execute_ins(AST* ast_ins, Resource* res){
     //int right_value = get_value(ast_ins->right, res);
     if(ast_ins->op_type == MOV){
         int right_value = get_value(ast_ins->right, res);
+        //printf("result = %d\n", right_value);
         set_value(ast_ins->left, right_value, res);
     }
 
@@ -18,6 +19,7 @@ void execute_ins(AST* ast_ins, Resource* res){
         int right_value = get_value(ast_ins->right, res);
         int left_value = get_value(ast_ins->left, res);
         int result = left_value - right_value;
+        //printf("result = %d\n", result);
         set_value(ast_ins->left, result, res);
     }
     
@@ -25,8 +27,10 @@ void execute_ins(AST* ast_ins, Resource* res){
         int right_value = get_value(ast_ins->right, res);
         int left_value = get_value(ast_ins->left, res);
         int result = right_value + left_value;
+        //printf("result = %d\n", result);
         set_value(ast_ins->left, result, res);
     }else{
+        error_handler("Incorrect execute INS");
         return;
     }
     res->current_ip+=1;

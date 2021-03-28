@@ -112,7 +112,7 @@ void set_value(Node node, int value, Resource* res);
 
 //scheduling
 void scheduling(Init* init);
-void show_resource(Resource* res);
+void show_resource(Resource* res, int process_number);
 
 void FIFO(Init* init, Resource* res);
 void SJF(Init* init, Resource* res);

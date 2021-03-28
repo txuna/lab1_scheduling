@@ -259,7 +259,7 @@ void fifo_sjf(Init* init, Resource* res, int type){
                 running = false;
                 finished_number_of_process +=1;
                 backup_pcb(init, current_process_number, res);
-                //show_resource(&init->pcb_list[current_process_number].res);
+                show_resource(&init->pcb_list[current_process_number].res, current_process_number);
             }
             else{
                 execute_ins(processing_parse_tree, res);
@@ -285,12 +285,14 @@ void MLFQ_RR(Init* init, Resource* res, int type_queue_number){
     AST* processing_parse_tree = NULL;
     int current_time_slice = 0;
     int is_switching = false;
+    int process_end = false;
 
     for(int finished_number_of_process = 0;finished_number_of_process<init->process_numberof;){
         if(!is_switching){
             check_arrive_time(init, queue_manager, 0, cpu_time);
+        }else{
+            is_switching = false;
         }
-        is_switching = false;
         if(running == false){
             //항상 모든 우선순위 큐를 돌리면서 우선순위가 높은 큐에 값이 있는지 찾는다. 
             for(queue_number=0;queue_number<type_queue_number;queue_number++){
@@ -301,6 +303,7 @@ void MLFQ_RR(Init* init, Resource* res, int type_queue_number){
                     //printf("-SWITCHING-");
                     is_switching = true;
                     current_process_number = current_queue->process_number;
+                    //printf("get queue : %d and cpu time : %d\n", current_process_number, cpu_time);
                     if(init->status[current_process_number] == READY){
                         init_pcb(current_process_number, res, init);
                     }
@@ -311,18 +314,26 @@ void MLFQ_RR(Init* init, Resource* res, int type_queue_number){
                     break;
                 }
             }
+
             
         } 
         else if(running == true){
+            execute_ins(processing_parse_tree, res);
+            printf("-%d-", current_process_number);
+            current_time_slice += 1;
+            processing_parse_tree = processing_parse_tree->next_instruction;
+
             if(current_time_slice >= time_slice || processing_parse_tree == NULL){
+                 backup_pcb(init, current_process_number, res);
                  if(processing_parse_tree == NULL){
                      //프로세스가 완전히 끝남
                     finished_number_of_process +=1;
                     init->status[current_process_number] = TERMINATE;
+                    show_resource(&init->pcb_list[current_process_number].res, current_process_number);
                  }else{
-                     //시간 할당량만을 다 썼기에 다음 순위의 큐에 insert 만약 최하위 큐라면 다시 해당 큐로 
-                    backup_pcb(init, current_process_number, res);
+                    //시간 할당량만을 다 썼기에 다음 순위의 큐에 insert 만약 최하위 큐라면 다시 해당 큐로 
                     get_process_service_time(init, current_process_number, current_time_slice);
+                    //printf("insert : %d and cpu time : %d\n", current_process_number, cpu_time);
                     if(queue_number == type_queue_number-1){
                         insert_queue(queue_manager, queue_number, current_process_number, init->serive_time[current_process_number]);
                     }else{
@@ -333,15 +344,12 @@ void MLFQ_RR(Init* init, Resource* res, int type_queue_number){
                 //is_switching = true;
                 running = false;
                 current_time_slice = 0;
-            }else{
-                execute_ins(processing_parse_tree, res);
-                processing_parse_tree = processing_parse_tree->next_instruction;
-                printf("-%d-", current_process_number);
-                current_time_slice += 1;
+                //continue;//여기서도 Time Slice가 끝났는지 확인해야함 안그럼 CPU TIME 한번 날먹됨. 아니면 continue로 CPU TIME ++ ㄴㄴ 
             }
         }
         if(!is_switching){
-            cpu_time+=1;   
+            cpu_time+=1;
+            //printf("\n  CPU PLUS %d\n", cpu_time);   
         }
     }
 }
@@ -362,8 +370,8 @@ void MLFQ(Init* init, Resource* res){
 
 
 
-void show_resource(Resource* res){
-    printf("\n===============REG=================\n");
+void show_resource(Resource* res, int process_number){
+    printf("\nProcess Number : %d  Register\n", process_number);
     printf("A regs : %d\n", res->regs.A);
     printf("B regs : %d\n", res->regs.B);
     printf("C regs : %d\n", res->regs.C);
